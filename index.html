@@ -7,38 +7,39 @@
 <style>
 html,body{
 margin:0;
-width:100%;
 height:100%;
-background:black;
 overflow:hidden;
+background:#000;
 font-family:Arial;
 }
 
-/* الصفحة الأولى */
-#intro{
-height:100%;
-display:flex;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-color:white;
+/* الخلفية */
+canvas{
+position:fixed;
+top:0;
+left:0;
 }
 
-/* العنصر الغامض */
-#mystery{
-width:60px;
-height:60px;
+/* النقطة التي يضغط عليها */
+#trigger{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:14px;
+height:14px;
+background:white;
+border-radius:50%;
 cursor:pointer;
-opacity:0.7;
+box-shadow:0 0 15px white;
 transition:0.3s;
 }
 
-#mystery:hover{
-opacity:1;
-transform:scale(1.1);
+#trigger:hover{
+transform:translate(-50%,-50%) scale(1.5);
 }
 
-/* الصفحة الثانية */
+/* صفحة الجيف */
 #main{
 display:none;
 position:fixed;
@@ -56,7 +57,7 @@ object-fit:cover;
 position:fixed;
 top:10px;
 right:10px;
-z-index:1000;
+z-index:100;
 }
 
 #credit a{
@@ -69,7 +70,6 @@ gap:5px;
 
 #credit img{
 width:18px;
-height:18px;
 }
 </style>
 </head>
@@ -83,39 +83,76 @@ height:18px;
 </a>
 </div>
 
-<!-- الصفحة الغامضة -->
-<div id="intro">
+<canvas id="bg"></canvas>
 
-<p style="opacity:0.6">something is watching</p>
+<div id="trigger"></div>
 
-<img id="mystery"
-src="https://cdn-icons-png.flaticon.com/512/159/159604.png">
-
-</div>
-
-<!-- الصفحة الرئيسية -->
 <div id="main">
 <img src="image.gif">
 <audio id="sound" src="sound.mp3"></audio>
 </div>
 
 <script>
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
 
-const intro = document.getElementById("intro");
-const main = document.getElementById("main");
-const mystery = document.getElementById("mystery");
-const sound = document.getElementById("sound");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-mystery.onclick = () => {
+let particles = [];
 
-intro.style.display="none";
+for(let i=0;i<120;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+size:Math.random()*2,
+speed:Math.random()*0.5
+});
+}
+
+function animate(){
+ctx.fillStyle="black";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="white";
+
+particles.forEach(p=>{
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+ctx.fill();
+
+p.y+=p.speed;
+
+if(p.y>canvas.height){
+p.y=0;
+p.x=Math.random()*canvas.width;
+}
+});
+
+requestAnimationFrame(animate);
+}
+
+animate();
+
+/* الضغط على النقطة */
+const trigger=document.getElementById("trigger");
+const main=document.getElementById("main");
+const sound=document.getElementById("sound");
+
+trigger.onclick=()=>{
+document.querySelector("canvas").style.display="none";
+trigger.style.display="none";
+
 main.style.display="block";
 
 document.documentElement.requestFullscreen();
 
 sound.play();
-
 };
+</script>
+
+</body>
+</html>
 
 </script>
 
